@@ -1,3 +1,7 @@
+function isString(s) { return s.constructor === String }
+function isNumber(n) { return (n).constructor === Number }
+function isFunction(f) { return f instanceof Function }
+
 export function h(name, props) {
   var node
   var rest = []
@@ -16,7 +20,7 @@ export function h(name, props) {
     }
   }
 
-  return typeof name === "function"
+  return isFunction(name)
     ? name(props || {}, children)
     : {
         name: name,
@@ -95,10 +99,10 @@ export function app(state, actions, view, container) {
 
   function wireStateToActions(path, state, actions) {
     for (var key in actions) {
-      typeof actions[key] === "function"
+      isFunction(actions[key])
         ? (function(key, action) {
             actions[key] = function(data) {
-              if (typeof (data = action(data)) === "function") {
+              if (isFunction(data = action(data))) {
                 data = data(get(path, globalState), actions)
               }
 
@@ -134,7 +138,7 @@ export function app(state, actions, view, container) {
         element[name][i] = value == null || value[i] == null ? "" : value[i]
       }
     } else {
-      if (typeof value === "function" || (name in element && !isSVG)) {
+      if (isFunction(value) || (name in element && !isSVG)) {
         element[name] = value == null ? "" : value
       } else if (value != null && value !== false) {
         element.setAttribute(name, value)
@@ -148,7 +152,7 @@ export function app(state, actions, view, container) {
 
   function createElement(node, isSVG) {
     var element =
-      typeof node === "string" || typeof node === "number"
+      isString(node) || isNumber(node)
         ? document.createTextNode(node)
         : (isSVG = isSVG || node.name === "svg")
           ? document.createElementNS("http://www.w3.org/2000/svg", node.name)
